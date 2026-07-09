@@ -41,6 +41,7 @@ pipeline {
 
     stage('Checkout') {
       steps {
+        deleteDir()
         checkout scm
       }
     }
@@ -50,7 +51,9 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds']]) {
           dir(TF_DIR) {
             sh '''
-              terraform init -input=false \
+            rm -rf .terraform
+
+              terraform init -reconfigure -input=false \
                 -backend-config="bucket=${TF_STATE_BUCKET}" \
                 -backend-config="key=elk-infra/terraform.tfstate" \
                 -backend-config="region=${AWS_REGION}" \
