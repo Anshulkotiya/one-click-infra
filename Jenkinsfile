@@ -134,6 +134,20 @@ pipeline {
       dir(ANSIBLE_DIR) {
         sh '''
           source /var/lib/jenkins/venv/bin/activate
+
+            echo "===== DEBUG ====="
+  which ansible
+  ansible --version
+  pwd
+  cat ansible.cfg
+
+  aws sts get-caller-identity
+
+  echo "===== INVENTORY ====="
+  ansible-inventory -i inventory/aws_ec2.yml --graph
+
+  echo "===== PLAYBOOK ====="
+
           ansible-playbook -i inventory/aws_ec2.yml playbook.yml
         '''
       }
