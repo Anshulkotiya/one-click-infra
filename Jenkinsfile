@@ -97,6 +97,33 @@ pipeline {
     }
 
    
+stage('Read Bastion IP') {
+    when {
+        expression { params.ACTION == 'apply' }
+    }
+
+    steps {
+        dir(TF_DIR) {
+            script {
+                env.BASTION_IP = sh(
+                    script: "terraform output -raw bastion_public_ip",
+                    returnStdout: true
+                ).trim()
+
+                echo "Bastion IP = ${env.BASTION_IP}"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
 
     stage('Wait for SSH') {
       when { expression { params.ACTION == 'apply' } }
