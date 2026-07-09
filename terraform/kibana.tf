@@ -22,7 +22,7 @@ resource "aws_instance" "kibana" {
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-Kibana"
-    Role = "kibana"
+    Role = "elk"
   })
 }
 

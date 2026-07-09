@@ -22,6 +22,6 @@ resource "aws_instance" "elasticsearch" {
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-Elasticsearch"
-    Role = "elasticsearch"
+    Role = "elk"
   })
 }

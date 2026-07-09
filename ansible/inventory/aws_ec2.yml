@@ -1,0 +1,22 @@
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - ap-south-1
+
+filters:
+  tag:Project:
+    - elk-one-click-infra
+
+keyed_groups:
+
+  - key: tags.Role
+    prefix: role
+
+  - key: tags.Kibana
+    prefix: kibana
+
+hostnames:
+  - private-ip-address
+
+compose:
+  ansible_host: private_ip_address

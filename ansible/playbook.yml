@@ -1,6 +1,6 @@
 ---
 - name: Deploy Secure Elasticsearch and Kibana with Anonymous access
-  hosts: elastic_servers
+  hosts: role_elk
   become: true
   vars:
     # Credentials setup for Elasticsearch File Realm
