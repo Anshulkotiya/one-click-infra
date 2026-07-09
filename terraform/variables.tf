@@ -55,7 +55,7 @@ variable "bastion_instance_type" {
 variable "app_instance_type" {
   description = "Instance type for Elasticsearch/Kibana app nodes (ES benefits from more RAM)"
   type        = string
-  default     = "t3.medium"
+  default     = "c7i-flex.large"
 }
 
 variable "asg_min_size" {
