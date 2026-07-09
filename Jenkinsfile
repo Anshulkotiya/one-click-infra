@@ -204,20 +204,28 @@ playbook.yml \
 
     stage('Show Access Info') {
       when { expression { params.ACTION == 'apply' } }
-      steps {
-        dir(TF_DIR) {
-          sh '''
-            echo "=================================================="
-            echo " Kibana URL   : http://$(terraform output -raw alb_dns_name)"
-            echo " Bastion IP   : $(terraform output -raw bastion_public_ip)"
-           echo "=================================================="
-          '''
+     
+    steps {
+        withCredentials([
+            [
+                $class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-creds'
+            ]
+        ]) {
+            dir('terraform') {
+                sh '''
+                echo "=================================================="
+                echo " Kibana URL : http://$(terraform output -raw alb_dns_name)"
+                echo " Bastion IP : $(terraform output -raw bastion_public_ip)"
+                echo "=================================================="
+                '''
+            }
         }
-      }
     }
-  }
+}
+  
 
-  post {
+post {
     always {
       archiveArtifacts artifacts: 'terraform/tfplan', allowEmptyArchive: true
       archiveArtifacts artifacts: 'ansible/inventory/aws_ec2.yml', allowEmptyArchive: true
