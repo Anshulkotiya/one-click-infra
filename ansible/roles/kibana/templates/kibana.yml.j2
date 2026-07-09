@@ -1,0 +1,30 @@
+# ======================== Kibana Server Configuration =========================
+server.port: {{ kibana_port }}
+server.host: "{{ kibana_host }}"
+
+# ======================== Elasticsearch Connection ============================
+# Kibana connects to Elasticsearch using this list of hosts.
+elasticsearch.hosts: ["http://127.0.0.1:{{ elasticsearch_port }}"]
+
+# Backend credentials Kibana uses to execute actions in Elasticsearch.
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "{{ elastic_kibana_system_password }}"
+
+# ======================== Kibana Authentication & Security =====================
+# Configure authentication providers. 
+# We set anonymous login as order: 0 (default) to log users in automatically without a password.
+# We keep basic form as order: 1 so administrators can log out and log in with credentials.
+xpack.security.authc.providers:
+  anonymous.anonymous1:
+    order: 0
+    credentials:
+      username: "{{ elastic_anonymous_user }}"
+      password: "{{ elastic_anonymous_password }}"
+  basic.basic1:
+    order: 1
+
+# ======================== Encryption Keys (Required in 8.x) ====================
+xpack.encryptedSavedObjects.encryptionKey: "a_very_long_32_character_encryption_key_for_saved_objects_kibana"
+xpack.reporting.encryptionKey: "a_very_long_32_character_encryption_key_for_reporting_kibana"
+xpack.security.encryptionKey: "a_very_long_32_character_encryption_key_for_security_kibana"
+

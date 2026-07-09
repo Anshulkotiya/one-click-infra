@@ -1,0 +1,36 @@
+---
+- name: Deploy Secure Elasticsearch and Kibana with Anonymous access
+  hosts: elastic_servers
+  become: true
+  vars:
+    # Credentials setup for Elasticsearch File Realm
+    # ------------------------------------------------------------------
+    # SECURITY NOTE: these defaults exist only so the playbook is runnable
+    # out of the box. In the Jenkins pipeline, real values are injected at
+    # runtime via `--extra-vars @secrets.yml`, where secrets.yml is written
+    # from Jenkins credential bindings (never committed to git). Extra-vars
+    # always win over these defaults, so nothing below is actually used in
+    # the CI/CD path — change these only for local/manual testing.
+    # ------------------------------------------------------------------
+    elastic_admin_user: "admin"
+    elastic_admin_password: "AdminPassword123!"
+    
+    elastic_anonymous_user: "kibana_anonymous_user"
+    elastic_anonymous_password: "AnonymousPassword123!"
+
+    # Password for the built-in system integration user 
+    elastic_kibana_system_password: "KibanaSystemPassword123!"
+
+
+    # Version to install (from Elasticsearch 8.x repository)
+    elastic_major_version: "8.x"
+    
+    # Node/Cluster details
+    elasticsearch_host: "0.0.0.0"
+    elasticsearch_port: 9200
+    kibana_host: "0.0.0.0"
+    kibana_port: 5601
+
+  roles:
+    - elasticsearch
+    - kibana
