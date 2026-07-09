@@ -109,7 +109,7 @@ pipeline {
 
             sh '''
 
-               source /var/lib/jenkins/venv/bin/activate
+               . /var/lib/jenkins/venv/bin/activate
               # Simple readiness loop: retry ansible ping for up to 5 minutes
               for i in $(seq 1 30); do
                 if ansible role_elk -m ping -i inventory/aws_ec2.yml; then
