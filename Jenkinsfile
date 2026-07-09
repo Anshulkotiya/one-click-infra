@@ -34,7 +34,7 @@ pipeline {
     TF_VAR_key_name = "${params.KEY_PAIR_NAME}"
     TF_VAR_aws_region = "${params.AWS_REGION}"
     ANSIBLE_DIR   = "ansible"
-    INVENTORY_OUT = "ansible/inventory/hosts.ini"
+    
   }
 
   stages {
@@ -96,20 +96,7 @@ pipeline {
       }
     }
 
-    stage('Discover Instances & Build Inventory') {
-      when { expression { params.ACTION == 'apply' } }
-      steps {
-        withCredentials([
-          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds'],
-          sshUserPrivateKey(credentialsId: 'elk-ec2-ssh-key', keyFileVariable: 'SSH_KEY_FILE')
-        ]) {
-          sh '''
-            chmod +x scripts/generate_inventory.sh
-            ./scripts/generate_inventory.sh "${TF_DIR}" "${SSH_KEY_FILE}" "${INVENTORY_OUT}"
-          '''
-        }
-      }
-    }
+   
 
     stage('Wait for SSH') {
       when { expression { params.ACTION == 'apply' } }
@@ -119,7 +106,7 @@ pipeline {
             sh '''
               # Simple readiness loop: retry ansible ping for up to 5 minutes
               for i in $(seq 1 30); do
-                if ansible elastic_servers -m ping -i inventory/hosts.ini; then
+                if ansible role_elk -m ping -i inventory/aws_ec2.yml; then
                   echo "All hosts reachable."
                   break
                 fi
@@ -137,7 +124,7 @@ pipeline {
       steps {
         dir(ANSIBLE_DIR) {
           sh '''
-            ansible-playbook -i inventory/hosts.ini playbook.yml
+            ansible-playbook -i inventory/aws_ec2.yml playbook.yml
           '''
         }
       }
@@ -161,7 +148,7 @@ pipeline {
   post {
     always {
       archiveArtifacts artifacts: 'terraform/tfplan', allowEmptyArchive: true
-      archiveArtifacts artifacts: 'ansible/inventory/hosts.ini', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'ansible/inventory/aws_ec2.yml', allowEmptyArchive: true
     }
     success {
       echo "Pipeline completed successfully (${params.ACTION})."
