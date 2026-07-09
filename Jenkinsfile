@@ -202,9 +202,7 @@ playbook.yml \
 }
 
 
-    stage('Show Access Info') {
-      when { expression { params.ACTION == 'apply' } }
-     
+stage('Show Access Info') {
     steps {
         withCredentials([
             [
@@ -223,6 +221,9 @@ playbook.yml \
         }
     }
 }
+
+
+
   
 
 post {
