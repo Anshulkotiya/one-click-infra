@@ -101,9 +101,15 @@ pipeline {
     stage('Wait for SSH') {
       when { expression { params.ACTION == 'apply' } }
       steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'elk-ec2-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
-          dir(ANSIBLE_DIR) {
+        withCredentials([
+    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds'],
+    sshUserPrivateKey(credentialsId: 'elk-ec2-ssh-key', keyFileVariable: 'SSH_KEY_FILE')
+]) {
+           dir(ANSIBLE_DIR) {
+
             sh '''
+
+               source /var/lib/jenkins/venv/bin/activate
               # Simple readiness loop: retry ansible ping for up to 5 minutes
               for i in $(seq 1 30); do
                 if ansible role_elk -m ping -i inventory/aws_ec2.yml; then
@@ -120,15 +126,21 @@ pipeline {
     }
 
     stage('Run Ansible Playbook (Install ES + Kibana)') {
-      when { expression { params.ACTION == 'apply' } }
-      steps {
-        dir(ANSIBLE_DIR) {
-          sh '''
-            ansible-playbook -i inventory/aws_ec2.yml playbook.yml
-          '''
-        }
+  when { expression { params.ACTION == 'apply' } }
+  steps {
+    withCredentials([
+      [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds']
+    ]) {
+      dir(ANSIBLE_DIR) {
+        sh '''
+          source /var/lib/jenkins/venv/bin/activate
+          ansible-playbook -i inventory/aws_ec2.yml playbook.yml
+        '''
       }
     }
+  }
+}
+
 
     stage('Show Access Info') {
       when { expression { params.ACTION == 'apply' } }
@@ -138,7 +150,7 @@ pipeline {
             echo "=================================================="
             echo " Kibana URL   : http://$(terraform output -raw alb_dns_name)"
             echo " Bastion IP   : $(terraform output -raw bastion_public_ip)"
-            echo "=================================================="
+           echo "=================================================="
           '''
         }
       }
