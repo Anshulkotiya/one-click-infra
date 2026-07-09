@@ -1,0 +1,6 @@
+ansible_user: ubuntu
+
+
+ansible_ssh_common_args: >-
+  -o StrictHostKeyChecking=no
+  -o ProxyJump=ubuntu@{{ bastion_ip }}

@@ -24,7 +24,7 @@ pipeline {
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Terraform action to run')
     string(name: 'KEY_PAIR_NAME', defaultValue: 'my-ec2-keypair', description: 'Existing AWS EC2 key pair name')
-    string(name: 'TF_STATE_BUCKET', defaultValue: 'my-terraform-assignment-bucket', description: 'S3 bucket for terraform remote state (created once via terraform/backend-setup)')
+    string(name: 'TF_STATE_BUCKET', defaultValue: 'my-terraform-assignment-bucket-anshul2026', description: 'S3 bucket for terraform remote state (created once via terraform/backend-setup)')
     string(name: 'AWS_REGION', defaultValue: 'ap-south-1', description: 'AWS region')
     booleanParam(name: 'AUTO_APPROVE', defaultValue: false, description: 'Skip manual approval before apply/destroy (use with care)')
   }
@@ -142,9 +142,16 @@ stage('Read Bastion IP') {
             sh '''
 
                . /var/lib/jenkins/venv/bin/activate
+                   
+               export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ProxyJump=ubuntu@${BASTION_IP}" 
+
+
+
               # Simple readiness loop: retry ansible ping for up to 5 minutes
               for i in $(seq 1 30); do
-                if ansible role_elk -m ping -i inventory/aws_ec2.yml; then
+                 if ansible role_elk -m ping \
+  -i inventory/aws_ec2.yml \
+  --private-key ${SSH_KEY_FILE}; then
                   echo "All hosts reachable."
                   break
                 fi
@@ -161,12 +168,16 @@ stage('Read Bastion IP') {
   when { expression { params.ACTION == 'apply' } }
   steps {
     withCredentials([
-      [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds']
+      [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds'],
+     sshUserPrivateKey(credentialsId: 'elk-ec2-ssh-key', keyFileVariable: 'SSH_KEY_FILE')
     ]) {
       dir(ANSIBLE_DIR) {
         sh '''
           source /var/lib/jenkins/venv/bin/activate
+           
+          export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ProxyJump=ubuntu@${BASTION_IP}"
 
+             
             echo "===== DEBUG ====="
   which ansible
   ansible --version
@@ -180,7 +191,10 @@ stage('Read Bastion IP') {
 
   echo "===== PLAYBOOK ====="
 
-          ansible-playbook -i inventory/aws_ec2.yml playbook.yml
+          ansible-playbook \
+-i inventory/aws_ec2.yml \
+playbook.yml \
+--private-key ${SSH_KEY_FILE}
         '''
       }
     }
