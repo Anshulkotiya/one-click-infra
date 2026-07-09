@@ -8,3 +8,4 @@ crash.*.log
 *.pem
 secrets.yml
 ansible/inventory/hosts.ini
+terraform/backend-dev.conf

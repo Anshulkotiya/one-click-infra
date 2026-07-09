@@ -24,11 +24,25 @@ output "alb_dns_name" {
   value       = aws_lb.app_alb.dns_name
 }
 
-output "asg_name" {
-  description = "Auto Scaling Group name — Jenkins uses this to discover current app node private IPs"
-  value       = aws_autoscaling_group.app_asg.name
-}
 
 output "app_security_group_id" {
   value = aws_security_group.app_sg.id
 }
+
+output "elasticsearch_private_ip" {
+  value = aws_instance.elasticsearch.private_ip
+}
+
+
+output "kibana_private_ip" {
+  value = aws_instance.kibana.private_ip
+}
+
+
+output "kibana_url" {
+
+  value = "http://${aws_lb.app_alb.dns_name}"
+
+}
+
+

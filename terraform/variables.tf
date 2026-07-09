@@ -55,26 +55,9 @@ variable "bastion_instance_type" {
 variable "app_instance_type" {
   description = "Instance type for Elasticsearch/Kibana app nodes (ES benefits from more RAM)"
   type        = string
-  default     = "t3.medium"
+  default     = "c7i-flex.large"
 }
 
-variable "asg_min_size" {
-  description = "Minimum number of app instances"
-  type        = number
-  default     = 2
-}
-
-variable "asg_max_size" {
-  description = "Maximum number of app instances"
-  type        = number
-  default     = 4
-}
-
-variable "asg_desired_capacity" {
-  description = "Desired number of app instances (one per private subnet by default, matches diagram)"
-  type        = number
-  default     = 2
-}
 
 variable "root_volume_size" {
   description = "Root EBS volume size (GB) for app nodes — Elasticsearch needs headroom for indices"
