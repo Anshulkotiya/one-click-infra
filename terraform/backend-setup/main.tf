@@ -33,7 +33,7 @@ variable "aws_region" {
 variable "state_bucket_name" {
   description = "Globally-unique S3 bucket name for Terraform remote state"
   type        = string
-  default     = "my-terraform-assignment-bucket"
+  default     = "my-terraform-assignment-bucket-anshul2026"
 }
 
 provider "aws" {
