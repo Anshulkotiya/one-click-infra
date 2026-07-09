@@ -24,7 +24,7 @@ pipeline {
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Terraform action to run')
     string(name: 'KEY_PAIR_NAME', defaultValue: 'my-ec2-keypair', description: 'Existing AWS EC2 key pair name')
-    string(name: 'TF_STATE_BUCKET', defaultValue: 'my-terraform-assignment-bucket', description: 'S3 bucket for terraform remote state (created once via terraform/backend-setup)')
+    string(name: 'TF_STATE_BUCKET', defaultValue: 'my-terraform-assignment-bucket-anshul2026', description: 'S3 bucket for terraform remote state (created once via terraform/backend-setup)')
     string(name: 'AWS_REGION', defaultValue: 'ap-south-1', description: 'AWS region')
     booleanParam(name: 'AUTO_APPROVE', defaultValue: false, description: 'Skip manual approval before apply/destroy (use with care)')
   }
