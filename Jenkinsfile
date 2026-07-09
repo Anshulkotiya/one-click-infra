@@ -103,20 +103,25 @@ stage('Read Bastion IP') {
     }
 
     steps {
-        dir(TF_DIR) {
-            script {
-                env.BASTION_IP = sh(
-                    script: "terraform output -raw bastion_public_ip",
-                    returnStdout: true
-                ).trim()
+        withCredentials([
+            [$class: 'AmazonWebServicesCredentialsBinding',
+             credentialsId: 'aws-elk-creds']
+        ]) {
 
-                echo "Bastion IP = ${env.BASTION_IP}"
+            dir(TF_DIR) {
+                script {
+                    env.BASTION_IP = sh(
+                        script: "terraform output -raw bastion_public_ip",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Bastion IP = ${env.BASTION_IP}"
+                }
             }
+
         }
     }
 }
-
-
 
 
 
