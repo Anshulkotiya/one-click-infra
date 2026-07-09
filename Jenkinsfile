@@ -8,10 +8,11 @@
 // Required Jenkins credentials (Manage Jenkins > Credentials):
 //   aws-elk-creds        (AWS Credentials plugin)      -> AWS access/secret key
 //   elk-ec2-ssh-key       (SSH Username with private key) -> key used for EC2 (bastion + app nodes)
-//   elk-admin-cidr        (Secret text)                 -> your IP as CIDR, e.g. 1.2.3.4/32
 //
-// NOTE: Elasticsearch/Kibana passwords are NOT injected from Jenkins here —
-// kept simple, using the defaults already set in ansible/playbook.yml.
+// NOTE: Bastion SSH access is open to 0.0.0.0/0 by default (var.admin_cidr in
+// variables.tf) — kept simple. Restrict it to your own IP for better security
+// if needed. Elasticsearch/Kibana passwords also use the defaults already
+// set in ansible/playbook.yml (not injected from Jenkins).
 //
 // Required Jenkins tools/plugins: Terraform (or terraform on PATH), AWS CLI,
 // Ansible, jq.
@@ -62,18 +63,13 @@ pipeline {
 
     stage('Terraform Validate & Plan') {
       steps {
-        withCredentials([
-          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds'],
-          string(credentialsId: 'elk-admin-cidr', variable: 'ADMIN_CIDR')
-        ]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds']]) {
           dir(TF_DIR) {
             script {
               def destroyFlag = (params.ACTION == 'destroy') ? '-destroy' : ''
               sh """
                 terraform validate
-                terraform plan -input=false ${destroyFlag} \
-                  -var="admin_cidr=${'$'}{ADMIN_CIDR}" \
-                  -out=tfplan
+                terraform plan -input=false ${destroyFlag} -out=tfplan
               """
             }
           }
@@ -92,6 +88,8 @@ pipeline {
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-elk-creds']]) {
           dir(TF_DIR) {
+            // Works for both actions: the plan file already encodes whether
+            // this is a create/update plan or a destroy plan (see previous stage).
             sh 'terraform apply -input=false -auto-approve tfplan'
           }
         }
@@ -119,6 +117,7 @@ pipeline {
         withCredentials([sshUserPrivateKey(credentialsId: 'elk-ec2-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
           dir(ANSIBLE_DIR) {
             sh '''
+              # Simple readiness loop: retry ansible ping for up to 5 minutes
               for i in $(seq 1 30); do
                 if ansible elastic_servers -m ping -i inventory/hosts.ini; then
                   echo "All hosts reachable."

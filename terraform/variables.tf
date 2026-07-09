@@ -40,9 +40,11 @@ variable "key_name" {
 }
 
 variable "admin_cidr" {
-  description = "CIDR allowed to SSH into the bastion host. Restrict this to your office/VPN IP, e.g. 1.2.3.4/32"
+  description = "CIDR allowed to SSH into the bastion host. Defaults to open (0.0.0.0/0) for simplicity."
   type        = string
+  default     = "0.0.0.0/0"
 }
+
 
 variable "bastion_instance_type" {
   description = "Instance type for the bastion host"
