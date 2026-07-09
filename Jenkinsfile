@@ -143,7 +143,7 @@ stage('Read Bastion IP') {
 
                . /var/lib/jenkins/venv/bin/activate
                    
-               export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ControlMaster=no -o ControlPersist=no -i ${SSH_KEY_FILE} -o ProxyCommand=\"ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} -W %h:%p ubuntu@${BASTION_IP}\"" 
+               export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ControlMaster=no -o ControlPersist=no -i ${SSH_KEY_FILE} -o ProxyCommand='ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} -W %h:%p ubuntu@${BASTION_IP}'" 
 
 
 
@@ -175,7 +175,7 @@ stage('Read Bastion IP') {
         sh '''
           source /var/lib/jenkins/venv/bin/activate
            
-          export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ControlMaster=no -o ControlPersist=no -i ${SSH_KEY_FILE} -o ProxyCommand=\"ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} -W %h:%p ubuntu@${BASTION_IP}\""
+          export ANSIBLE_SSH_COMMON_ARGS="-o StrictHostKeyChecking=no -o ControlMaster=no -o ControlPersist=no -i ${SSH_KEY_FILE} -o ProxyCommand='ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} -W %h:%p ubuntu@${BASTION_IP}'"
 
              
             echo "===== DEBUG ====="
