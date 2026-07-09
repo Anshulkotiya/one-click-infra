@@ -1,6 +1,5 @@
 ansible_user: ubuntu
-
-
+bastion_ip: "{{ lookup('env', 'BASTION_IP') }}"
 ansible_ssh_common_args: >-
   -o StrictHostKeyChecking=no
   -o ProxyJump=ubuntu@{{ bastion_ip }}
