@@ -165,17 +165,20 @@
   ansible.builtin.uri:
     url: "http://127.0.0.1:9200/_cluster/health"
     method: GET
-    status_code: 200
+    user: "{{ elastic_admin_user }}"
+    password: "{{ elastic_admin_password }}"
+    force_basic_auth: yes
+    status_code: [200, 503]
   register: cluster_status
-  until: "cluster_status.json.status in ['green', 'yellow']"
-  retries: 40
-  delay: 15
-
-
-
+  until: >
+    cluster_status.json is defined and 
+    cluster_status.json.status is defined and 
+    cluster_status.json.status in ['green', 'yellow']
+  retries: 30
+  delay: 4
 
 - name: Set password for kibana_system built-in user
-  uri:
+  ansible.builtin.uri:
     url: "http://127.0.0.1:{{ elasticsearch_port }}/_security/user/kibana_system/_password"
     method: POST
     user: "{{ elastic_admin_user }}"
@@ -189,4 +192,4 @@
   until: set_kibana_system_pw.status == 200
   retries: 5
   delay: 2
-
+  run_once: true

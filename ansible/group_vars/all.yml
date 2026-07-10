@@ -6,3 +6,5 @@ ansible_ssh_common_args: >-
   -o ControlMaster=no
   -o ControlPersist=no
   -o ProxyCommand="ssh -o StrictHostKeyChecking=no -i {{ ssh_key_file }} -W %h:%p ubuntu@{{ bastion_ip }}"
+
+elasticsearch_private_ip: "{{ groups['role_elk'][0] }}"
