@@ -6,6 +6,7 @@
       - ca-certificates
       - gnupg
       - curl
+      - unzip
     state: present
     update_cache: yes
 - name: Add Elastic GPG signing key
