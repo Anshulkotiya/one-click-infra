@@ -20,3 +20,4 @@ hostnames:
 
 compose:
   ansible_host: private_ip_address
+  node_name: "node-{{ private_ip_address | replace('.', '-') }}"
