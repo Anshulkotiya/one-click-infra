@@ -1,22 +1,28 @@
-# ======================== Elasticsearch Configuration =========================
+# ======================== Elasticsearch Configuration ==================>
 cluster.name: elk-cluster
-node.name: "node-{{ inventory_hostname | replace('.', '-') }}"
+node.name: "node-{{ ansible_host | default(inventory_hostname) | replace('.', '-') }}"
+
 # Path to directory where to store data
 path.data: /var/lib/elasticsearch
-# Path to log files
 path.logs: /var/log/elasticsearch
+
 # Network configuration
-network.host: {{ elasticsearch_host }}
-http.port: {{ elasticsearch_port }}
+network.host: 0.0.0.0
+http.port: {{ elasticsearch_port | default(9200) }}
+transport.port: 9300
+
+# Network Discovery
 discovery.seed_hosts:
 {% for host in groups['role_elk'] %}
-  - {{ hostvars[host].ansible_host }}
+  - "{{ hostvars[host].ansible_host | default(host) }}"
 {% endfor %}
+
 cluster.initial_master_nodes:
 {% for host in groups['role_elk'] %}
-  - "node-{{ host | replace('.', '-') }}"
+  - "node-{{ hostvars[host].ansible_host | default(host) | replace('.', '-') }}"
 {% endfor %}
-# ======================== X-Pack Security =====================================
+
+# ======================== X-Pack Security ==============================>
 xpack.security.enabled: true
 xpack.security.http.ssl.enabled: false
 xpack.security.transport.ssl.enabled: true

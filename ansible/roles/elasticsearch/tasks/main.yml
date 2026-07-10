@@ -161,6 +161,18 @@
     timeout: 60
     state: started
 
+- name: Wait for Elasticsearch cluster state to recover
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:9200/_cluster/health"
+    method: GET
+    status_code: 200
+  register: cluster_status
+  until: "cluster_status.json.status in ['green', 'yellow']"
+  retries: 40
+  delay: 15
+
+
+
 
 - name: Set password for kibana_system built-in user
   uri:
