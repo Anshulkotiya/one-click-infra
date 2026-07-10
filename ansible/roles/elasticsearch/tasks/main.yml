@@ -110,6 +110,7 @@
     owner: root
     group: elasticsearch
     mode: '0640'
+
 - name: Copy Elasticsearch configuration file
   template:
     src: elasticsearch.yml.j2
@@ -118,17 +119,21 @@
     group: elasticsearch
     mode: '0660'
   notify: Restart Elasticsearch
+
 - name: Check existing users in file realm
   command: "/usr/share/elasticsearch/bin/elasticsearch-users list"
   register: es_users_list
   changed_when: false
   failed_when: false
+
 - name: Create admin superuser in file realm
   command: "/usr/share/elasticsearch/bin/elasticsearch-users useradd {{ elastic_admin_user }} -p {{ elastic_admin_password }} -r superuser"
   when: elastic_admin_user not in es_users_list.stdout
+
 - name: Create anonymous viewer user in file realm
   command: "/usr/share/elasticsearch/bin/elasticsearch-users useradd {{ elastic_anonymous_user }} -p {{ elastic_anonymous_password }} -r kibana_user,viewer"
   when: elastic_anonymous_user not in es_users_list.stdout
+
 - name: Ensure correct permissions on file realm credentials
   file:
     path: "{{ item }}"
@@ -140,11 +145,14 @@
     - /etc/elasticsearch/users
     - /etc/elasticsearch/users_roles
   failed_when: false
+
 - name: Enable and start Elasticsearch service
   systemd:
     name: elasticsearch
     state: started
     enabled: yes
+
+
 - name: Wait for Elasticsearch to start listening on port 9200
   wait_for:
     host: 127.0.0.1
@@ -152,7 +160,6 @@
     delay: 5
     timeout: 60
     state: started
-
 
 
 - name: Set password for kibana_system built-in user
