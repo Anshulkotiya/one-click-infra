@@ -22,6 +22,93 @@
     name: elasticsearch
     state: present
     update_cache: yes
+- name: Ensure certs directory exists
+  file:
+    path: /etc/elasticsearch/certs
+    state: directory
+    owner: root
+    group: elasticsearch
+    mode: '0750'
+
+- name: Generate CA certificate (only on first node)
+  command: /usr/share/elasticsearch/bin/elasticsearch-certutil ca --silent --pem --out /tmp/elastic-stack-ca.zip
+  args:
+    creates: /tmp/elastic-stack-ca.zip
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Unzip CA certificate (only on first node)
+  unarchive:
+    src: /tmp/elastic-stack-ca.zip
+    dest: /tmp
+    remote_src: yes
+    creates: /tmp/ca/ca.crt
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Generate node certificate signed by CA (only on first node)
+  command: /usr/share/elasticsearch/bin/elasticsearch-certutil cert --silent --pem --ca-cert /tmp/ca/ca.crt --ca-key /tmp/ca/ca.key --out /tmp/elastic-certs.zip --name elastic-node
+  args:
+    creates: /tmp/elastic-certs.zip
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Unzip node certificate (only on first node)
+  unarchive:
+    src: /tmp/elastic-certs.zip
+    dest: /tmp
+    remote_src: yes
+    creates: /tmp/elastic-node/elastic-node.crt
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Fetch CA cert to controller
+  fetch:
+    src: /tmp/ca/ca.crt
+    dest: /tmp/elk-certs/ca.crt
+    flat: yes
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Fetch node cert to controller
+  fetch:
+    src: /tmp/elastic-node/elastic-node.crt
+    dest: /tmp/elk-certs/elastic-node.crt
+    flat: yes
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Fetch node key to controller
+  fetch:
+    src: /tmp/elastic-node/elastic-node.key
+    dest: /tmp/elk-certs/elastic-node.key
+    flat: yes
+  run_once: true
+  delegate_to: "{{ groups['role_elk'][0] }}"
+
+- name: Copy CA cert to all nodes
+  copy:
+    src: /tmp/elk-certs/ca.crt
+    dest: /etc/elasticsearch/certs/ca.crt
+    owner: root
+    group: elasticsearch
+    mode: '0640'
+
+- name: Copy node cert to all nodes
+  copy:
+    src: /tmp/elk-certs/elastic-node.crt
+    dest: /etc/elasticsearch/certs/elastic-node.crt
+    owner: root
+    group: elasticsearch
+    mode: '0640'
+
+- name: Copy node key to all nodes
+  copy:
+    src: /tmp/elk-certs/elastic-node.key
+    dest: /etc/elasticsearch/certs/elastic-node.key
+    owner: root
+    group: elasticsearch
+    mode: '0640'
 - name: Copy Elasticsearch configuration file
   template:
     src: elasticsearch.yml.j2
