@@ -1,40 +1,24 @@
 # ======================== Elasticsearch Configuration =========================
 cluster.name: elk-cluster
-node.name: {{ node_name }}
-
+node.name: "node-{{ inventory_hostname | replace('.', '-') }}"
 # Path to directory where to store data
 path.data: /var/lib/elasticsearch
-
 # Path to log files
 path.logs: /var/log/elasticsearch
-
 # Network configuration
 network.host: {{ elasticsearch_host }}
 http.port: {{ elasticsearch_port }}
-
 discovery.seed_hosts:
 {% for host in groups['role_elk'] %}
   - {{ hostvars[host].ansible_host }}
 {% endfor %}
-
 cluster.initial_master_nodes:
 {% for host in groups['role_elk'] %}
-  - {{ hostvars[host].node_name }}
+  - "node-{{ host | replace('.', '-') }}"
 {% endfor %}
-
-
-
-
-
-
-# Single-Node configuration
-#discovery.type: single-node
-
 # ======================== X-Pack Security =====================================
 xpack.security.enabled: true
-
 # Disable TLS/SSL for HTTP (recommended for dev/internal network to avoid cert errors)
 xpack.security.http.ssl.enabled: false
-
 # Disable transport TLS/SSL (allowed for single-node cluster discovery)
 xpack.security.transport.ssl.enabled: false
