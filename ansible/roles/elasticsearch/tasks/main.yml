@@ -153,19 +153,7 @@
     timeout: 60
     state: started
 
-- name: Wait for cluster state to recover (2-node cluster formation)
-  uri:
-    url: "http://127.0.0.1:{{ elasticsearch_port }}/_cluster/health?wait_for_status=yellow&timeout=50s"
-    method: GET
-    user: "{{ elastic_admin_user }}"
-    password: "{{ elastic_admin_password }}"
-    force_basic_auth: yes
-    status_code: 200
-    timeout: 60
-  register: cluster_health
-  until: cluster_health.status == 200
-  retries: 10
-  delay: 5
+
 
 - name: Set password for kibana_system built-in user
   uri:
