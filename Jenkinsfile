@@ -207,7 +207,7 @@ stage('Show Access Info') {
         withCredentials([
             [
                 $class: 'AmazonWebServicesCredentialsBinding',
-                credentialsId: 'aws-creds'
+                credentialsId: 'aws-elk-creds'
             ]
         ]) {
             dir('terraform') {
