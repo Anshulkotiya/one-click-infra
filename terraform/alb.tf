@@ -29,6 +29,17 @@ resource "aws_lb_target_group" "kibana_tg" {
     unhealthy_threshold = 3
   }
 
+  stickiness {
+    type            = "lb_cookie"
+    cookie_duration = 3600
+    enabled         = true
+  }
+
+
+
+
+
+
   tags = merge(var.tags, {
     Name = "${var.project_name}-Target-Group"
   })
