@@ -1,0 +1,12 @@
+plugin: aws_ec2
+regions:
+  - us-east-1 # Matching terraform default region
+filters:
+  instance-state-name: running
+keyed_groups:
+  - key: tags.Role
+    prefix: role
+  - key: tags.Kibana
+    prefix: kibana
+compose:
+  ansible_host: public_ip_address
