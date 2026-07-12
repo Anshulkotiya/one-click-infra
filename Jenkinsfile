@@ -1,22 +1,4 @@
-// ============================================================================
-// One-Click ELK Infra Pipeline
-//
-// Flow: checkout -> terraform init/plan/apply -> discover new instance IPs
-//       -> generate ansible inventory -> run ansible playbook (ES + Kibana)
-//       -> print access info
-//
-// Required Jenkins credentials (Manage Jenkins > Credentials):
-//   aws-elk-creds        (AWS Credentials plugin)      -> AWS access/secret key
-//   elk-ec2-ssh-key       (SSH Username with private key) -> key used for EC2 (bastion + app nodes)
-//
-// NOTE: Bastion SSH access is open to 0.0.0.0/0 by default (var.admin_cidr in
-// variables.tf) — kept simple. Restrict it to your own IP for better security
-// if needed. Elasticsearch/Kibana passwords also use the defaults already
-// set in ansible/playbook.yml (not injected from Jenkins).
-//
-// Required Jenkins tools/plugins: Terraform (or terraform on PATH), AWS CLI,
-// Ansible, jq.
-// ============================================================================
+
 
 pipeline {
   agent any
